@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../app/models/index.js"],"names":["module","exports","codigoSchema"],"mappings":";;AAAA;;AAEAA,OAAOC,OAAP,GAAiB;AACfC;AADe,CAAjB","file":"index.js","sourcesContent":["import { codigoSchema } from './codigo';\n\nmodule.exports = {\n  codigoSchema\n};\n"]}

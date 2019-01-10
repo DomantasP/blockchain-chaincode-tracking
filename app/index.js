@@ -24,7 +24,6 @@ export default class Chaincode {
     console.info(ret);
 
     const method = this[ret.fcn];
-    console.log(method);
     if (!method) {
       const message = `funcao com nome ${ret.fcn} nao encontrado`;
       console.log(message);
@@ -39,9 +38,40 @@ export default class Chaincode {
     }
   }
 
+  async getDataById(stub, args) {
+    // 1. Verify batchId is not empty
+    const data = args[0];
+    if (!data) {
+      throw new Error('Por favor especifique um id');
+    }
+
+    console.info('--- start getData ---');
+
+    // 2. Verify if batch exist
+    const dataAsBytes = await stub.getState(data);
+    if (!dataAsBytes.toString()) {
+      throw new Error(`"Data com id ${data} nao encontrado"`);
+    }
+
+    console.info('==================');
+    console.log(dataAsBytes.toString());
+    console.info('==================');
+    console.info('--- end getData ---');
+
+    return dataAsBytes;
+  }
+
   async solicitarCodigo(stub, args) {
     try {
       await Codigo.solicitarCodigo(stub, args);
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  async usarCodigo(stub, args) {
+    try {
+      await Codigo.usarCodigo(stub, args);
     } catch (e) {
       throw e;
     }
@@ -68,6 +98,7 @@ export default class Chaincode {
   static async getAllResults(iterator, isHistory) {
     const allResults = [];
     while (true) {
+      /* eslint no-await-in-loop: "off" */
       const res = await iterator.next();
 
       if (res.value && res.value.value.toString()) {

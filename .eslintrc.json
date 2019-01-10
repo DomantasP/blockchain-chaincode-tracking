@@ -3,6 +3,8 @@
   "rules": {
     "comma-dangle": ["error", "never"],
     "no-console": "off",
-    "no-mixed-operators": 0
+    "no-mixed-operators": 0,
+    "max-len": "off",
+    "class-methods-use-this": "off"
   }
 }

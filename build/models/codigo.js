@@ -5,12 +5,27 @@ Object.defineProperty(exports, "__esModule", {
 });
 var yup = require('yup');
 
-var codigoSchema = yup.object().shape({
-  tipoDestinatario: yup.string().required('Por favor especifique um tipoDestinatario'), // ****REQUIRED****
-  identificador: yup.string().required('Por favor especifique um identificador'), // ****REQUIRED****
-  idServico: yup.string().required('Por favor especifique um idServico'), // ****REQUIRED****
-  qtdEtiquetas: yup.number().positive().required('Por favor especifique um qtdEtiquetas') // ****REQUIRED****
+// not used for now
+var codigoSchema = exports.codigoSchema = yup.object().shape({
+  docType: yup.string().default('codigo').test('is-docType-exist', 'Por favor especifique docType', function (value) {
+    return value === 'codigo';
+  }),
+  codigo: yup.string().required('Por favor especifique um codigo'),
+  embarcador: yup.string().default(''),
+  transportador: yup.string().default(''),
+  rota: yup.string().default(''),
+  servico: yup.string().default(''),
+  servico_codigo: yup.string().default(''),
+  usado: yup.string().default(false)
 });
 
-exports.default = codigoSchema;
+var usarCodigoSchema = exports.usarCodigoSchema = yup.object().shape({
+  transportador: yup.string().required('Por favor especifique um transportador'),
+  rota: yup.string().required('Por favor especifique uma rota'),
+  servico: yup.string().required('Por favor especifique um servico'),
+  servico_codigo: yup.string().required('Por favor especifique um servico_codigo'),
+  usado: yup.boolean().default(true).test('is-true', '"usado" nao definido como true', function (value) {
+    return value === true;
+  })
+});
 //# sourceMappingURL=codigo.js.map
