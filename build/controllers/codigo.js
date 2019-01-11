@@ -20,6 +20,7 @@ var _codigo = require('../models/codigo');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//  descend into nested schema - return on first error - remove unspecified keys from objects
 var validationOptions = { recursive: true, abortEarly: true, stripUnknown: true };
 
 var solicitarCodigo = exports.solicitarCodigo = async function solicitarCodigo(stub, args) {
@@ -137,7 +138,7 @@ var usarCodigo = exports.usarCodigo = async function usarCodigo(stub, args) {
   var dataToUpdate = JSON.parse(dataAsBytes.toString());
   // Verify if not used
   if (dataToUpdate.usado) {
-    throw new Error('"codigo ' + data.codigo + ' usado";');
+    throw new Error('"codigo ' + data.codigo + ' ja usado";');
   }
 
   // Merge formatted data

@@ -1,5 +1,5 @@
 {
-  "name": "logistic",
+  "name": "correio",
   "version": "1.0.0",
   "description": "logistic chaincode implemented in node.js",
   "engines": {
@@ -10,7 +10,7 @@
     "clean": "rm -rf build && mkdir build",
     "build-server": "babel -d ./build ./app -s",
     "build": "npm run clean && npm run build-server",
-    "start": "npm run build && node ./build/index.js",
+    "start": "node ./build/index.js",
     "test": "mocha"
   },
   "engine-strict": true,
@@ -30,7 +30,6 @@
     "eslint": "^5.12.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
-    "mocha": "^5.2.0",
-    "undefined": "^0.1.0"
+    "mocha": "^5.2.0"
   }
 }

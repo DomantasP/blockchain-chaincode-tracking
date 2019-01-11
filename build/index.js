@@ -59,7 +59,7 @@ var Chaincode = function () {
         return _fabricShim2.default.error(message);
       }
       try {
-        var payload = await method(stub, ret.params);
+        var payload = await method(stub, ret.params, this);
         return _fabricShim2.default.success(payload);
       } catch (err) {
         console.log(err);
@@ -68,7 +68,7 @@ var Chaincode = function () {
     }
   }, {
     key: 'getDataById',
-    value: async function getDataById(stub, args) {
+    value: async function getDataById(stub, args, thisClass) {
       // 1. Verify batchId is not empty
       var data = args[0];
       if (!data) {
@@ -92,7 +92,7 @@ var Chaincode = function () {
     }
   }, {
     key: 'solicitarCodigo',
-    value: async function solicitarCodigo(stub, args) {
+    value: async function solicitarCodigo(stub, args, thisClass) {
       try {
         await Codigo.solicitarCodigo(stub, args);
       } catch (e) {
@@ -101,7 +101,7 @@ var Chaincode = function () {
     }
   }, {
     key: 'usarCodigo',
-    value: async function usarCodigo(stub, args) {
+    value: async function usarCodigo(stub, args, thisClass) {
       try {
         await Codigo.usarCodigo(stub, args);
       } catch (e) {
@@ -115,7 +115,7 @@ var Chaincode = function () {
 
   }, {
     key: 'richQuery',
-    value: async function richQuery(stub, args) {
+    value: async function richQuery(stub, args, thisClass) {
       //   0
       // 'queryString'
       if (args.length < 1) {
@@ -125,43 +125,14 @@ var Chaincode = function () {
       if (!queryString) {
         throw new Error('queryString must not be empty');
       }
-      var method = this.getQueryResultForQueryString;
-      var queryResults = await method(stub, queryString);
+      var method = thisClass["getQueryResultForQueryString"];
+      var queryResults = await method(stub, queryString, thisClass);
       return queryResults;
     }
   }, {
-    key: 'getQueryResultForQueryString',
-
-
-    // getQueryResultForQueryString executes the passed in query string.
-    // Result set is built and returned as a byte array containing the JSON results.
-    value: async function getQueryResultForQueryString(stub, queryString) {
-      console.info('- getQueryResultForQueryString queryString:\n + ' + queryString);
-      var resultsIterator = await stub.getQueryResult(queryString);
-      var method = this.getAllResults;
-
-      var results = await method(resultsIterator, false);
-
-      return Buffer.from(JSON.stringify(results));
-    }
-  }, {
-    key: 'getHistory',
-    value: async function getHistory(stub, args) {
-      if (args.length < 1) {
-        throw new Error('Incorrect number of arguments. Expecting an id to look for');
-      }
-      var id = args[0];
-      console.info('--- start getHistoryFor: %s\n');
-
-      var resultsIterator = await stub.getHistoryForKey(id);
-      var method = this.getAllResults;
-      var results = await method(resultsIterator, true);
-
-      return Buffer.from(JSON.stringify(results));
-    }
-  }], [{
     key: 'getAllResults',
     value: async function getAllResults(iterator, isHistory) {
+      console.log('using getAllResults');
       var allResults = [];
       while (true) {
         /* eslint no-await-in-loop: "off" */
@@ -199,6 +170,36 @@ var Chaincode = function () {
           return allResults;
         }
       }
+    }
+
+    // getQueryResultForQueryString executes the passed in query string.
+    // Result set is built and returned as a byte array containing the JSON results.
+
+  }, {
+    key: 'getQueryResultForQueryString',
+    value: async function getQueryResultForQueryString(stub, queryString, thisClass) {
+      console.info('- getQueryResultForQueryString queryString:\n ' + queryString);
+      var resultsIterator = await stub.getQueryResult(queryString);
+      var method = thisClass["getAllResults"];
+
+      var results = await method(resultsIterator, false);
+
+      return Buffer.from(JSON.stringify(results));
+    }
+  }, {
+    key: 'getHistory',
+    value: async function getHistory(stub, args, thisClass) {
+      if (args.length < 1) {
+        throw new Error('Incorrect number of arguments. Expecting an id to look for');
+      }
+      var id = args[0];
+      console.info('--- start getHistoryFor:\n ' + id);
+
+      var resultsIterator = await stub.getHistoryForKey(id);
+      var method = thisClass["getAllResults"];
+
+      var results = await method(resultsIterator, true);
+      return Buffer.from(JSON.stringify(results));
     }
   }]);
 

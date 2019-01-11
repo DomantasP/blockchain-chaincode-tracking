@@ -3,7 +3,7 @@ import uuidv4 from 'uuid/v4';
 import { performance } from 'perf_hooks';
 import { generateCodigo } from '../utils';
 import { usarCodigoSchema } from '../models/codigo';
-
+//  descend into nested schema - return on first error - remove unspecified keys from objects
 const validationOptions = { recursive: true, abortEarly: true, stripUnknown: true };
 
 export const solicitarCodigo = async (stub, args) => {

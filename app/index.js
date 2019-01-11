@@ -30,7 +30,7 @@ export default class Chaincode {
       return shim.error(message);
     }
     try {
-      const payload = await method(stub, ret.params);
+      const payload = await method(stub, ret.params, this);
       return shim.success(payload);
     } catch (err) {
       console.log(err);
@@ -38,7 +38,7 @@ export default class Chaincode {
     }
   }
 
-  async getDataById(stub, args) {
+  async getDataById(stub, args, thisClass) {
     // 1. Verify batchId is not empty
     const data = args[0];
     if (!data) {
@@ -61,7 +61,7 @@ export default class Chaincode {
     return dataAsBytes;
   }
 
-  async solicitarCodigo(stub, args) {
+  async solicitarCodigo(stub, args, thisClass) {
     try {
       await Codigo.solicitarCodigo(stub, args);
     } catch (e) {
@@ -69,7 +69,7 @@ export default class Chaincode {
     }
   }
 
-  async usarCodigo(stub, args) {
+  async usarCodigo(stub, args, thisClass) {
     try {
       await Codigo.usarCodigo(stub, args);
     } catch (e) {
@@ -80,7 +80,7 @@ export default class Chaincode {
   // Rich Query (Only supported if CouchDB is used as state database):
   // peer chaincode query -C myc -n mycc -c
   // '{"Args":["richQuery","{\"selector\":{\"status\":\"1\"}}"]}'
-  async richQuery(stub, args) {
+  async richQuery(stub, args, thisClass) {
     //   0
     // 'queryString'
     if (args.length < 1) {
@@ -90,12 +90,13 @@ export default class Chaincode {
     if (!queryString) {
       throw new Error('queryString must not be empty');
     }
-    const method = this.getQueryResultForQueryString;
-    const queryResults = await method(stub, queryString);
+    const method = thisClass["getQueryResultForQueryString"];
+    const queryResults = await method(stub, queryString, thisClass);
     return queryResults;
   }
 
-  static async getAllResults(iterator, isHistory) {
+  async getAllResults(iterator, isHistory) {
+    console.log('using getAllResults');
     const allResults = [];
     while (true) {
       /* eslint no-await-in-loop: "off" */
@@ -137,27 +138,27 @@ export default class Chaincode {
 
   // getQueryResultForQueryString executes the passed in query string.
   // Result set is built and returned as a byte array containing the JSON results.
-  async getQueryResultForQueryString(stub, queryString) {
-    console.info(`- getQueryResultForQueryString queryString:\n + ${queryString}`);
+  async getQueryResultForQueryString(stub, queryString, thisClass) {
+    console.info(`- getQueryResultForQueryString queryString:\n ${queryString}`);
     const resultsIterator = await stub.getQueryResult(queryString);
-    const method = this.getAllResults;
+    const method = thisClass["getAllResults"];
 
     const results = await method(resultsIterator, false);
 
     return Buffer.from(JSON.stringify(results));
   }
 
-  async getHistory(stub, args) {
+  async getHistory(stub, args, thisClass) {
     if (args.length < 1) {
       throw new Error('Incorrect number of arguments. Expecting an id to look for');
     }
     const id = args[0];
-    console.info('--- start getHistoryFor: %s\n');
+    console.info(`--- start getHistoryFor:\n ${id}`);
 
     const resultsIterator = await stub.getHistoryForKey(id);
-    const method = this.getAllResults;
-    const results = await method(resultsIterator, true);
+    const method = thisClass["getAllResults"];
 
+    const results = await method(resultsIterator, true);
     return Buffer.from(JSON.stringify(results));
   }
 }
