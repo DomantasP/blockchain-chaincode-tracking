@@ -10,7 +10,7 @@ var codigoSchema = exports.codigoSchema = yup.object().shape({
   docType: yup.string().default('codigo').test('is-docType-exist', 'Por favor especifique docType', function (value) {
     return value === 'codigo';
   }),
-  codigo: yup.string().required('Por favor especifique um codigo'),
+  id: yup.string().required('Por favor especifique um codigo'),
   embarcador: yup.string().default(''),
   transportador: yup.string().default(''),
   rota: yup.string().default(''),

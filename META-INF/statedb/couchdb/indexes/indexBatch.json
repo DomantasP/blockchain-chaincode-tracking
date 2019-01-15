@@ -1,0 +1,1 @@
+{ "index": { "fields": ["docType", "batch"] }, "ddoc": "indexBatchDoc", "name": "indexBatch", "type": "json" }

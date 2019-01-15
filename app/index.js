@@ -39,7 +39,7 @@ export default class Chaincode {
   }
 
   async getDataById(stub, args, thisClass) {
-    // 1. Verify batchId is not empty
+    // 1. Verify id is not empty
     const data = args[0];
     if (!data) {
       throw new Error('Por favor especifique um id');

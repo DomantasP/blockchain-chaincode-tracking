@@ -53,7 +53,8 @@ var solicitarCodigo = exports.solicitarCodigo = async function solicitarCodigo(s
   // Create batch
   var batch = {
     docType: 'batch',
-    batchId: (0, _v2.default)(),
+    embarcador: embarcadorSelected,
+    id: (0, _v2.default)(),
     codigos: [],
     organization: organizationMSPID
   };
@@ -64,10 +65,11 @@ var solicitarCodigo = exports.solicitarCodigo = async function solicitarCodigo(s
     var newCodigo = true;
     while (newCodigo) {
       codigo = {
+        batchId: batch.id,
         docType: 'codigo',
-        codigo: (0, _utils.generateCodigo)(),
+        id: (0, _utils.generateCodigo)(),
         transportador: '',
-        embarcador: data.embarcador,
+        embarcador: embarcadorSelected,
         rota: '',
         servico: '',
         servico_codigo: '',
@@ -77,16 +79,16 @@ var solicitarCodigo = exports.solicitarCodigo = async function solicitarCodigo(s
 
       // verify if codigo already exist
       /* eslint no-await-in-loop: "off" */
-      var newCodigoAsBytes = await stub.getState(codigo.codigo);
+      var newCodigoAsBytes = await stub.getState(codigo.id);
       // Generate a new code if codigo already exist
       /* eslint no-unneeded-ternary: "off" */
       newCodigo = newCodigoAsBytes.toString() ? true : false;
     }
     // Push to batch
-    batch.codigos.push(codigo.codigo);
+    batch.codigos.push(codigo.id);
 
     // Put codigo to ledger
-    codigoPutStatePromises.push(stub.putState(codigo.codigo, Buffer.from(JSON.stringify(codigo))));
+    codigoPutStatePromises.push(stub.putState(codigo.id, Buffer.from(JSON.stringify(codigo))));
   }
 
   // Wait for all codigo putState promise
@@ -94,7 +96,7 @@ var solicitarCodigo = exports.solicitarCodigo = async function solicitarCodigo(s
 
   // Put batch to ledger
   var batchAsBytes = Buffer.from(JSON.stringify(batch));
-  await stub.putState(batch.batchId, batchAsBytes);
+  await stub.putState(batch.id, batchAsBytes);
 
   stub.setEvent('batchCreated', batchAsBytes);
   console.info('==================');
@@ -129,16 +131,16 @@ var usarCodigo = exports.usarCodigo = async function usarCodigo(stub, args) {
   }
 
   // Verify if data exists
-  var dataAsBytes = await stub.getState(data.codigo);
+  var dataAsBytes = await stub.getState(data.id);
   if (dataAsBytes === undefined || !dataAsBytes.toString()) {
-    throw new Error('"codigo ' + data.codigo + ' nao encontrado";');
+    throw new Error('codigo "' + data.id + '"" nao encontrado');
   }
 
   // Parse data that will be updated
   var dataToUpdate = JSON.parse(dataAsBytes.toString());
   // Verify if not used
   if (dataToUpdate.usado) {
-    throw new Error('"codigo ' + data.codigo + ' ja usado";');
+    throw new Error('codigo "' + data.id + '"" ja usado');
   }
 
   // Merge formatted data
@@ -146,9 +148,9 @@ var usarCodigo = exports.usarCodigo = async function usarCodigo(stub, args) {
 
   // 8. Put unidadeTransporte in the Ledger & send event
   var updatedDataAsBytes = Buffer.from(JSON.stringify(updatedData));
-  await stub.putState(updatedData.codigo, updatedDataAsBytes);
-  stub.setEvent('codigoUsado', updatedDataAsBytes);
+  await stub.putState(updatedData.id, updatedDataAsBytes);
 
+  stub.setEvent('codigoUsado', updatedDataAsBytes);
   console.info('==================');
   console.log(updatedData);
   console.info('==================');
