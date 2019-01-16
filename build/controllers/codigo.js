@@ -122,6 +122,11 @@ var usarCodigo = exports.usarCodigo = async function usarCodigo(stub, args) {
 
   console.info('--- start usoCodigo ---');
 
+  // check mandatory fields
+  if (!data.id) {
+    throw new Error('Por favor fornece um campo "id"');
+  }
+
   // Verify data format
   try {
     formattedData = await _codigo.usarCodigoSchema.validate(data, validationOptions);
@@ -133,14 +138,14 @@ var usarCodigo = exports.usarCodigo = async function usarCodigo(stub, args) {
   // Verify if data exists
   var dataAsBytes = await stub.getState(data.id);
   if (dataAsBytes === undefined || !dataAsBytes.toString()) {
-    throw new Error('codigo "' + data.id + '"" nao encontrado');
+    throw new Error('codigo "' + data.id + '" nao encontrado');
   }
 
   // Parse data that will be updated
   var dataToUpdate = JSON.parse(dataAsBytes.toString());
   // Verify if not used
   if (dataToUpdate.usado) {
-    throw new Error('codigo "' + data.id + '"" ja usado');
+    throw new Error('codigo "' + data.id + '" ja usado');
   }
 
   // Merge formatted data

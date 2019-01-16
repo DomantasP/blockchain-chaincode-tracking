@@ -25,7 +25,7 @@ export default class Chaincode {
 
     const method = this[ret.fcn];
     if (!method) {
-      const message = `funcao com nome ${ret.fcn} nao encontrado`;
+      const message = `funcao com nome "${ret.fcn}" nao encontrado`;
       console.log(message);
       return shim.error(message);
     }
@@ -49,9 +49,6 @@ export default class Chaincode {
 
     // 2. Verify if batch exist
     const dataAsBytes = await stub.getState(data);
-    if (!dataAsBytes.toString()) {
-      throw new Error(`"Data com id ${data} nao encontrado"`);
-    }
 
     console.info('==================');
     console.log(dataAsBytes.toString());
@@ -90,7 +87,7 @@ export default class Chaincode {
     if (!queryString) {
       throw new Error('queryString must not be empty');
     }
-    const method = thisClass["getQueryResultForQueryString"];
+    const method = thisClass['getQueryResultForQueryString'];
     const queryResults = await method(stub, queryString, thisClass);
     return queryResults;
   }
@@ -141,7 +138,7 @@ export default class Chaincode {
   async getQueryResultForQueryString(stub, queryString, thisClass) {
     console.info(`- getQueryResultForQueryString queryString:\n ${queryString}`);
     const resultsIterator = await stub.getQueryResult(queryString);
-    const method = thisClass["getAllResults"];
+    const method = thisClass['getAllResults'];
 
     const results = await method(resultsIterator, false);
 
@@ -156,7 +153,7 @@ export default class Chaincode {
     console.info(`--- start getHistoryFor:\n ${id}`);
 
     const resultsIterator = await stub.getHistoryForKey(id);
-    const method = thisClass["getAllResults"];
+    const method = thisClass['getAllResults'];
 
     const results = await method(resultsIterator, true);
     return Buffer.from(JSON.stringify(results));

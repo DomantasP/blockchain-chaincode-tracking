@@ -54,7 +54,7 @@ var Chaincode = function () {
 
       var method = this[ret.fcn];
       if (!method) {
-        var message = 'funcao com nome ' + ret.fcn + ' nao encontrado';
+        var message = 'funcao com nome "' + ret.fcn + '" nao encontrado';
         console.log(message);
         return _fabricShim2.default.error(message);
       }
@@ -79,9 +79,6 @@ var Chaincode = function () {
 
       // 2. Verify if batch exist
       var dataAsBytes = await stub.getState(data);
-      if (!dataAsBytes.toString()) {
-        throw new Error('"Data com id ' + data + ' nao encontrado"');
-      }
 
       console.info('==================');
       console.log(dataAsBytes.toString());
@@ -125,7 +122,7 @@ var Chaincode = function () {
       if (!queryString) {
         throw new Error('queryString must not be empty');
       }
-      var method = thisClass["getQueryResultForQueryString"];
+      var method = thisClass['getQueryResultForQueryString'];
       var queryResults = await method(stub, queryString, thisClass);
       return queryResults;
     }
@@ -180,7 +177,7 @@ var Chaincode = function () {
     value: async function getQueryResultForQueryString(stub, queryString, thisClass) {
       console.info('- getQueryResultForQueryString queryString:\n ' + queryString);
       var resultsIterator = await stub.getQueryResult(queryString);
-      var method = thisClass["getAllResults"];
+      var method = thisClass['getAllResults'];
 
       var results = await method(resultsIterator, false);
 
@@ -196,7 +193,7 @@ var Chaincode = function () {
       console.info('--- start getHistoryFor:\n ' + id);
 
       var resultsIterator = await stub.getHistoryForKey(id);
-      var method = thisClass["getAllResults"];
+      var method = thisClass['getAllResults'];
 
       var results = await method(resultsIterator, true);
       return Buffer.from(JSON.stringify(results));

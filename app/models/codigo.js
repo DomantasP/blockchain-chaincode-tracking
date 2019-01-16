@@ -6,7 +6,7 @@ export const codigoSchema = yup.object().shape({
     .string()
     .default('codigo')
     .test('is-docType-exist', 'Por favor especifique docType', value => value === 'codigo'),
-  id: yup.string().required('Por favor especifique um codigo'),
+  id: yup.string().required('Por favor especifique um codigo id'),
   embarcador: yup.string().default(''),
   transportador: yup.string().default(''),
   rota: yup.string().default(''),
@@ -16,6 +16,7 @@ export const codigoSchema = yup.object().shape({
 });
 
 export const usarCodigoSchema = yup.object().shape({
+  id: yup.string().required('Por favor especifique um codigo id'),
   transportador: yup.string().required('Por favor especifique um transportador'),
   rota: yup.string().required('Por favor especifique uma rota'),
   servico: yup.string().required('Por favor especifique um servico'),
