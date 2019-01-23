@@ -1,7 +1,7 @@
 {
-  "name": "correio",
+  "name": "tracking",
   "version": "1.0.0",
-  "description": "logistic chaincode implemented in node.js",
+  "description": "tracking chaincode implemented in node.js",
   "engines": {
     "node": ">=8.4.0",
     "npm": ">=5.3.0"

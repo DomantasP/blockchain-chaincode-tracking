@@ -8,17 +8,7 @@ function getRandomUppercase(length = 1) {
 }
 
 function getRandomNumber(length = 1) {
-  return Math.floor(10 ** (length - 1) + Math.random() * 9 * 10 ** (length - 1)); // removed the 0 possibility was causing length problem
-  // return Math.floor(Math.random() * 10 ** length);
-}
-
-export function getRandomId(length = 1) {
-  let text = '';
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < length; i += 1) {
-    text += letters.charAt(Math.floor(Math.random() * letters.length));
-  }
-  return text;
+  return Math.floor(10 ** (length - 1) + Math.random() * 9 * 10 ** (length - 1));
 }
 
 function generateFullCodigo(codigo) {
@@ -29,7 +19,7 @@ function generateFullCodigo(codigo) {
   let dv;
   const multiplicadores = [8, 6, 4, 2, 3, 5, 9, 7];
   let soma = 0;
-  // Preenche número com 0 à esquerda
+
   if (codigo.length < 12) {
     throw new Error('could not calculate codigo');
   } else if (numero.length < 8 && codigo.length === 12) {
@@ -58,6 +48,7 @@ function generateFullCodigo(codigo) {
   return retorno;
 }
 
+/* eslint-disable import/prefer-default-export */
 export function generateCodigo() {
   return generateFullCodigo(`${getRandomUppercase(2)}${getRandomNumber(8)}${getRandomUppercase(2)}`);
 }

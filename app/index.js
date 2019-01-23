@@ -11,7 +11,7 @@ export default class Chaincode {
   async Init(stub) {
     const ret = stub.getFunctionAndParameters();
     console.info(ret);
-    console.info('=========== Instantiated Logistic Chaincode ===========');
+    console.info('=========== Instantiated Tracking Chaincode ===========');
     return shim.success();
   }
 
@@ -23,42 +23,43 @@ export default class Chaincode {
     const ret = stub.getFunctionAndParameters();
     console.info(ret);
 
-    const method = this[ret.fcn];
+    const method = this.ret.fcn;
+
+    // If no method is passed throw errors
     if (!method) {
       const message = `funcao com nome "${ret.fcn}" nao encontrado`;
       console.log(message);
-      return shim.error(message);
+      throw new Error(message);
     }
     try {
       const payload = await method(stub, ret.params, this);
       return shim.success(payload);
     } catch (err) {
-      console.log(err);
-      return shim.error(err.message ? err.message : err);
+      console.log(err.stack);
+      return shim.error(err.message ? err.message : 'Por favor tente novamente mais tarde');
     }
   }
 
-  async getDataById(stub, args, thisClass) {
-    // 1. Verify id is not empty
+  async getDataById(stub, args) {
+    // Verify id is not empty
     const data = args[0];
     if (!data) {
       throw new Error('Por favor especifique um id');
     }
 
-    console.info('--- start getData ---');
+    console.info('--- start getDataById ---');
 
-    // 2. Verify if batch exist
     const dataAsBytes = await stub.getState(data);
 
     console.info('==================');
     console.log(dataAsBytes.toString());
     console.info('==================');
-    console.info('--- end getData ---');
+    console.info('--- end getDataById ---');
 
     return dataAsBytes;
   }
 
-  async solicitarCodigo(stub, args, thisClass) {
+  async solicitarCodigo(stub, args) {
     try {
       await Codigo.solicitarCodigo(stub, args);
     } catch (e) {
@@ -66,7 +67,7 @@ export default class Chaincode {
     }
   }
 
-  async usarCodigo(stub, args, thisClass) {
+  async usarCodigo(stub, args) {
     try {
       await Codigo.usarCodigo(stub, args);
     } catch (e) {
@@ -75,11 +76,8 @@ export default class Chaincode {
   }
 
   // Rich Query (Only supported if CouchDB is used as state database):
-  // peer chaincode query -C myc -n mycc -c
-  // '{"Args":["richQuery","{\"selector\":{\"status\":\"1\"}}"]}'
+  // peer chaincode query -C myc -n mycc -c '{"Args":["richQuery","{\"selector\":{\"status\":\"1\"}}"]}'
   async richQuery(stub, args, thisClass) {
-    //   0
-    // 'queryString'
     if (args.length < 1) {
       throw new Error('Incorrect number of arguments. Expecting queryString');
     }
@@ -87,7 +85,7 @@ export default class Chaincode {
     if (!queryString) {
       throw new Error('queryString must not be empty');
     }
-    const method = thisClass['getQueryResultForQueryString'];
+    const method = thisClass.getQueryResultForQueryString;
     const queryResults = await method(stub, queryString, thisClass);
     return queryResults;
   }
@@ -96,12 +94,11 @@ export default class Chaincode {
     console.log('using getAllResults');
     const allResults = [];
     while (true) {
-      /* eslint no-await-in-loop: "off" */
+      /* eslint-disable no-await-in-loop */
       const res = await iterator.next();
 
       if (res.value && res.value.value.toString()) {
         const jsonResponse = {};
-        // console.log(res.value.value.toString("utf8"));
 
         if (isHistory && isHistory === true) {
           jsonResponse.TxId = res.value.tx_id;
@@ -138,7 +135,7 @@ export default class Chaincode {
   async getQueryResultForQueryString(stub, queryString, thisClass) {
     console.info(`- getQueryResultForQueryString queryString:\n ${queryString}`);
     const resultsIterator = await stub.getQueryResult(queryString);
-    const method = thisClass['getAllResults'];
+    const method = thisClass.getAllResults;
 
     const results = await method(resultsIterator, false);
 
@@ -153,9 +150,10 @@ export default class Chaincode {
     console.info(`--- start getHistoryFor:\n ${id}`);
 
     const resultsIterator = await stub.getHistoryForKey(id);
-    const method = thisClass['getAllResults'];
+    const method = thisClass.getAllResults;
 
     const results = await method(resultsIterator, true);
+
     return Buffer.from(JSON.stringify(results));
   }
 }
