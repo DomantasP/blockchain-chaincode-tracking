@@ -1,6 +1,6 @@
 // const config = require('../config.js');
 import uuidv4 from 'uuid/v4';
-import { performance } from 'perf_hooks';
+// import { performance } from 'perf_hooks';
 import { generateCodigo } from '../utils';
 import { usarCodigoSchema } from '../models/codigo';
 
@@ -8,7 +8,7 @@ import { usarCodigoSchema } from '../models/codigo';
 const validationOptions = { recursive: true, abortEarly: true, stripUnknown: true };
 
 export const solicitarCodigo = async (stub, args) => {
-  const t0 = performance.now();
+  // const t0 = performance.now();
 
   let data;
   const codigoPutStatePromises = [];
@@ -19,12 +19,14 @@ export const solicitarCodigo = async (stub, args) => {
   } catch (err) {
     throw new Error('Não foi possivel decodificar o JSON, por favor verifique o formato');
   }
+
   console.info('--- start solicitarCodigo ---');
 
-  // check mandatory fields
+  // Verify mandatory fields was passed
   if (!(data.embarcador && data.quantidade)) {
-    throw new Error('Por favor preenche campo mandatorio');
+    throw new Error('Por favor preenche campo mandatorio embarcador/quantidade');
   }
+
   // Verify embarcador value
   const embarcadorSelected = data.embarcador.toLowerCase();
   const embarcadorAvailable = ['b2w', 'mercado livre', 'magazine luiza', 'via varejo', 'privalia'];
@@ -32,6 +34,7 @@ export const solicitarCodigo = async (stub, args) => {
     throw new Error('Embarcador nao disponivel');
   }
 
+  // get MSPID of transaction proposer
   const organizationMSPID = stub.getCreator().mspid;
 
   // Create batch
@@ -46,8 +49,7 @@ export const solicitarCodigo = async (stub, args) => {
   // Create tracking code
   for (let i = 0; i < data.quantidade; i += 1) {
     let codigo;
-    let newCodigo = true;
-    while (newCodigo) {
+    while (true) {
       codigo = {
         batchId: batch.id,
         docType: 'codigo',
@@ -61,24 +63,27 @@ export const solicitarCodigo = async (stub, args) => {
         // status: 1
       };
 
-      // verify if codigo already exist
-      /* eslint no-await-in-loop: "off" */
+      // Verify if codigo already exist
+      /* eslint-disable no-await-in-loop */
       const newCodigoAsBytes = await stub.getState(codigo.id);
-      // Generate a new code if codigo already exist
-      /* eslint no-unneeded-ternary: "off" */
-      newCodigo = newCodigoAsBytes.toString() ? true : false;
+
+      // Loop again and generate a new code if codigo already exist
+      /* eslint-disable no-unneeded-ternary */
+      if (!newCodigoAsBytes.toString()) {
+        break;
+      }
     }
-    // Push to batch
+    // Push codigo id into batch
     batch.codigos.push(codigo.id);
 
-    // Put codigo to ledger
+    // Push codigo into ledger
     codigoPutStatePromises.push(stub.putState(codigo.id, Buffer.from(JSON.stringify(codigo))));
   }
 
-  // Wait for all codigo putState promise
+  // Wait for all codigo putState promises to terminate
   await Promise.all(codigoPutStatePromises);
 
-  // Put batch to ledger
+  // Push batch into ledger
   const batchAsBytes = Buffer.from(JSON.stringify(batch));
   await stub.putState(batch.id, batchAsBytes);
 
@@ -89,8 +94,8 @@ export const solicitarCodigo = async (stub, args) => {
 
   console.info('--- end create codigoRastreamento ---');
 
-  const t1 = performance.now();
-  console.log(`Call took ${t1 - t0} ms.`);
+  // const t1 = performance.now();
+  // console.log(`Call took ${t1 - t0} ms.`);
 };
 
 export const usarCodigo = async (stub, args) => {
@@ -106,28 +111,25 @@ export const usarCodigo = async (stub, args) => {
 
   console.info('--- start usoCodigo ---');
 
-  // check mandatory fields
-  if (!data.id) {
-    throw new Error('Por favor fornece um campo "id"');
-  }
-
-  // Verify data format
+  // Verify Object format
   try {
     formattedData = await usarCodigoSchema.validate(data, validationOptions);
-  } catch (e) {
-    console.log(e);
-    throw new Error(e.message);
+  } catch (err) {
+    // log yup validation errors
+    console.log(err);
+    throw new Error(err.message);
   }
 
-  // Verify if data exists
+  // Verify if data already exist
   const dataAsBytes = await stub.getState(data.id);
-  if (dataAsBytes === undefined || !dataAsBytes.toString()) {
+  // undefined is used for testing purpose (bug in the test lib)
+  if (!dataAsBytes.toString() || dataAsBytes === undefined) {
     throw new Error(`codigo "${data.id}" nao encontrado`);
   }
 
   // Parse data that will be updated
   const dataToUpdate = JSON.parse(dataAsBytes.toString());
-  // Verify if not used
+  // Verify if codigo was not already used
   if (dataToUpdate.usado) {
     throw new Error(`codigo "${data.id}" ja usado`);
   }
@@ -135,7 +137,7 @@ export const usarCodigo = async (stub, args) => {
   // Merge formatted data
   const updatedData = { ...dataToUpdate, ...formattedData };
 
-  // 8. Put unidadeTransporte in the Ledger & send event
+  // Put unidadeTransporte in the Ledger & send event
   const updatedDataAsBytes = Buffer.from(JSON.stringify(updatedData));
   await stub.putState(updatedData.id, updatedDataAsBytes);
 

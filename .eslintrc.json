@@ -5,6 +5,7 @@
     "no-console": "off",
     "no-mixed-operators": 0,
     "max-len": "off",
-    "class-methods-use-this": "off"
+    "class-methods-use-this": "off",
+    "dot-notation": "off"
   }
 }

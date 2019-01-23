@@ -11,6 +11,7 @@ function getRandomNumber(length = 1) {
   return Math.floor(10 ** (length - 1) + Math.random() * 9 * 10 ** (length - 1));
 }
 
+// add numero verificador to code
 function generateFullCodigo(codigo) {
   const prefixo = codigo.substring(0, 2);
   const numero = codigo.substring(2, 10);
