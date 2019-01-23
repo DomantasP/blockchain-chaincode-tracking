@@ -27,7 +27,7 @@ export default class Chaincode {
 
     // Verify if method exist
     if (!method) {
-      return shim.error(`funcao com nome '${ret.fcn}' nao encontrado`);
+      return shim.error(`funcao com nome "${ret.fcn}" nao encontrado`);
     }
 
     try {

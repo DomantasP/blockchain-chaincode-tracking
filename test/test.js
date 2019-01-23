@@ -6,29 +6,6 @@ import Chaincode from '../app/chaincode.js';
 
 const MyChaincode = new Chaincode();
 
-const orgSchema = {
-  smart_contract: { versao: '1.0', nome: 'organizacao' },
-  endereco: {
-    uf: '',
-    cidade: '',
-    cep: '',
-    bairro: '',
-    referencia: '',
-    complemento: '',
-    numero: '',
-    rua: ''
-  },
-  ie: '',
-  nome_fantasia: '',
-  razao_social: '',
-  cnpj: '',
-  email: '',
-  responsavel: '',
-  tipo: '',
-  nome: '',
-  docType: 'organizacao'
-};
-
 describe('Test chaincode', () => {
   const mockStub = new ChaincodeMockStub('MyMockStub', MyChaincode);
 
