@@ -1,7 +1,7 @@
 {
-  "name": "tracking",
+  "name": "codigo-rastreamento",
   "version": "1.0.0",
-  "description": "tracking chaincode implemented in node.js",
+  "description": "Codigo Rastreamento chaincode implemented in node.js",
   "engines": {
     "node": ">=8.4.0",
     "npm": ">=5.3.0"
@@ -18,7 +18,8 @@
   "dependencies": {
     "@theledger/fabric-chaincode-utils": "^4.0.0",
     "@theledger/fabric-mock-stub": "^3.0.0",
-    "fabric-shim": "1.2.0",
+    "fabric-client": "^1.2.2",
+    "fabric-shim": "1.4",
     "uuid": "^3.3.2",
     "yup": "^0.26.6"
   },

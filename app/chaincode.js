@@ -49,8 +49,11 @@ export default class Chaincode {
     console.info('--- start getDataById ---');
 
     const dataAsBytes = await stub.getState(data);
+
+    // ternary operation for testing return undefined instead of empty string
+    const dataAsString = dataAsBytes ? dataAsBytes.toString() : '';
     console.info('==================');
-    console.log(dataAsBytes.toString());
+    console.log(dataAsString);
     console.info('==================');
 
     console.info('--- end getDataById ---');

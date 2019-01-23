@@ -66,10 +66,11 @@ export const solicitarCodigo = async (stub, args) => {
       // Verify if codigo already exist
       /* eslint-disable no-await-in-loop */
       const newCodigoAsBytes = await stub.getState(codigo.id);
-
+      // ternary operation for testing return undefined instead of empty string
+      const newCodigoAsString = newCodigoAsBytes ? newCodigoAsBytes.toString() : '';
       // Loop again and generate a new code if codigo already exist
       /* eslint-disable no-unneeded-ternary */
-      if (!newCodigoAsBytes.toString()) {
+      if (!newCodigoAsString) {
         break;
       }
     }
@@ -92,7 +93,7 @@ export const solicitarCodigo = async (stub, args) => {
   console.log(batch);
   console.info('==================');
 
-  console.info('--- end create codigoRastreamento ---');
+  console.info('--- end create solicitarCodigo ---');
 
   // const t1 = performance.now();
   // console.log(`Call took ${t1 - t0} ms.`);
@@ -122,8 +123,9 @@ export const usarCodigo = async (stub, args) => {
 
   // Verify if data already exist
   const dataAsBytes = await stub.getState(data.id);
+  const dataAsString = dataAsBytes ? dataAsBytes.toString() : '';
   // undefined is used for testing purpose (bug in the test lib)
-  if (!dataAsBytes.toString() || dataAsBytes === undefined) {
+  if (!dataAsString) {
     throw new Error(`codigo "${data.id}" nao encontrado`);
   }
 
