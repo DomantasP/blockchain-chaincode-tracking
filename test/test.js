@@ -107,7 +107,8 @@ describe('Test chaincode', () => {
     };
     const batchResponse = await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
     const eventPayload = await mockStub.getEvent('batchCreated');
-    const codigoId = JSON.parse(eventPayload.toString()).codigos[0];
+
+    let codigoId = JSON.parse(eventPayload.toString()).codigos[0];
     const useCodigoRequest = {
       id: codigoId,
       transportador: 'test',
@@ -115,16 +116,19 @@ describe('Test chaincode', () => {
       servico: 'test',
       servico_codigo: 'test'
     };
+
     const usarCodigoResponse = await mockStub.mockInvoke('tx2', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
+    const codigoCreated = await mockStub.mockInvoke('tx3', ['getDataById', codigoId]);
+
     const useCodigoRequest2 = {
-      id: codigoId,
+      id: codigoCreated.id,
       transportador: 'test',
       rota: 'test',
       servico: 'test',
       servico_codigo: 'test',
       usado: false
     };
-    const usarCodigoResponse2 = await mockStub.mockInvoke('tx2', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
+    const usarCodigoResponse2 = await mockStub.mockInvoke('tx4', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
     expect(usarCodigoResponse2.message).to.equal(`codigo "${codigoId}" ja usado`);
   });
 });
