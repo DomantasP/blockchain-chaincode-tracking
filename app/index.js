@@ -7,7 +7,7 @@ import shim from 'fabric-shim';
 import util from 'util';
 import * as Codigo from './controllers/codigo';
 
-export default class Chaincode {
+class Chaincode {
   async Init(stub) {
     const ret = stub.getFunctionAndParameters();
     console.info(ret);
