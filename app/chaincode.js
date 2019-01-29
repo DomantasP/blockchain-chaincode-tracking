@@ -11,7 +11,7 @@ export default class Chaincode {
   async Init(stub) {
     const ret = stub.getFunctionAndParameters();
     console.info(ret);
-    console.info('=========== Instantiated Tracking Chaincode ===========');
+    console.info('=========== Instantiated Codigo Rastreamento Chaincode ===========');
     return shim.success();
   }
 
@@ -39,9 +39,11 @@ export default class Chaincode {
     }
   }
 
+  // Function for retrieving state value
   async getDataById(stub, args) {
-    // Verify id is not empty
+    // Assign id to data
     const data = args[0];
+    // Verify id is not empty
     if (!data) {
       throw new Error('Por favor especifique um id');
     }
@@ -50,7 +52,9 @@ export default class Chaincode {
 
     const dataAsBytes = await stub.getState(data);
 
-    // ternary operation for testing return undefined instead of empty string
+    // Ternary operation is used for testing purpose
+    // The value returned by an empty key:value pair is set to undefined instead of '' in the testing environment
+    // Causing toString() to throw an error
     const dataAsString = dataAsBytes ? dataAsBytes.toString() : '';
     console.info('==================');
     console.log(dataAsString);
@@ -61,6 +65,7 @@ export default class Chaincode {
     return dataAsBytes;
   }
 
+  // Function for creating batch of tracking code
   async solicitarCodigo(stub, args) {
     try {
       await Codigo.solicitarCodigo(stub, args);
@@ -69,6 +74,7 @@ export default class Chaincode {
     }
   }
 
+  // Function for using a tracking code
   async usarCodigo(stub, args) {
     try {
       await Codigo.usarCodigo(stub, args);

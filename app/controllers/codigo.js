@@ -1,4 +1,3 @@
-// const config = require('../config.js');
 import uuidv4 from 'uuid/v4';
 // import { performance } from 'perf_hooks';
 import { generateCodigo } from '../utils';
@@ -13,7 +12,7 @@ export const solicitarCodigo = async (stub, args) => {
   let data;
   const codigoPutStatePromises = [];
 
-  // Parse JSON stringified request
+  // 1. Parse JSON stringified request
   try {
     data = JSON.parse(args.toString());
   } catch (err) {
@@ -22,31 +21,32 @@ export const solicitarCodigo = async (stub, args) => {
 
   console.info('--- start solicitarCodigo ---');
 
-  // Verify mandatory fields was passed
+  // 2. Verify mandatory fields was passed
   if (!(data.embarcador && data.quantidade)) {
     throw new Error('Por favor preenche campo mandatorio embarcador/quantidade');
   }
 
-  // Verify embarcador value
+  // 3. Verify embarcador value
   const embarcadorSelected = data.embarcador.toLowerCase();
   const embarcadorAvailable = ['b2w', 'mercado livre', 'magazine luiza', 'via varejo', 'privalia'];
   if (!embarcadorAvailable.includes(embarcadorSelected)) {
     throw new Error('Embarcador nao disponivel');
   }
 
-  // get MSPID of transaction proposer
+  // 4. get MSPID of transaction proposer
   const organizationMSPID = stub.getCreator().mspid;
 
-  // Create batch
+  // 5. Create batch
   const batch = {
     docType: 'batch',
     embarcador: embarcadorSelected,
     id: uuidv4(),
     codigos: [],
+    quantidade: data.quantidade,
     organization: organizationMSPID
   };
 
-  // Create tracking code
+  // 6. Create tracking code
   for (let i = 0; i < data.quantidade; i += 1) {
     let codigo;
     while (true) {
@@ -63,31 +63,31 @@ export const solicitarCodigo = async (stub, args) => {
         // status: 1
       };
 
-      // Verify if codigo already exist
+      // 6.1. Verify if codigo already exist
       /* eslint-disable no-await-in-loop */
       const newCodigoAsBytes = await stub.getState(codigo.id);
-      // ternary operation for testing return undefined instead of empty string
+      // Ternary operation is use because the value returned by an empty key:value pair is set to undefined instead of '' in the testing environment
       const newCodigoAsString = newCodigoAsBytes ? newCodigoAsBytes.toString() : '';
-      // Loop again and generate a new code if codigo already exist
-      /* eslint-disable no-unneeded-ternary */
+      // 6.2. Loop again and generate a new code if codigo already exist
       if (!newCodigoAsString) {
         break;
       }
     }
-    // Push codigo id into batch
+    // 6.3. Push codigo id into batch
     batch.codigos.push(codigo.id);
 
-    // Push codigo into ledger
+    // 6.4. Push codigo into ledger
     codigoPutStatePromises.push(stub.putState(codigo.id, Buffer.from(JSON.stringify(codigo))));
   }
 
-  // Wait for all codigo putState promises to terminate
+  // 7. Wait for all codigo putState promises to terminate
   await Promise.all(codigoPutStatePromises);
 
-  // Push batch into ledger
+  // 8. Push data into ledger
   const batchAsBytes = Buffer.from(JSON.stringify(batch));
   await stub.putState(batch.id, batchAsBytes);
 
+  // 9. Create event
   stub.setEvent('batchCreated', batchAsBytes);
   console.info('==================');
   console.log(batch);
@@ -103,16 +103,16 @@ export const usarCodigo = async (stub, args) => {
   let data;
   let formattedData;
 
-  // Parse JSON stringified request
+  // 1. Parse JSON stringified request
   try {
     data = JSON.parse(args.toString());
   } catch (err) {
     throw new Error('Não foi possivel decodificar o JSON, por favor verifique o formato');
   }
 
-  console.info('--- start usoCodigo ---');
+  console.info('--- start usarCodigo ---');
 
-  // Verify Object format
+  // 2. Verify Object format
   try {
     formattedData = await usarCodigoSchema.validate(data, validationOptions);
   } catch (err) {
@@ -121,31 +121,36 @@ export const usarCodigo = async (stub, args) => {
     throw new Error(err.message);
   }
 
-  // Verify if data already exist
   const dataAsBytes = await stub.getState(data.id);
+
+  // Ternary operation is use because the value returned by an empty key:value pair is set to undefined instead of '' in the testing environment
   const dataAsString = dataAsBytes ? dataAsBytes.toString() : '';
-  // undefined is used for testing purpose (bug in the test lib)
+
+  // 3. Verify if data already exist
   if (!dataAsString) {
     throw new Error(`codigo "${data.id}" nao encontrado`);
   }
 
-  // Parse data that will be updated
+  // 4. Parse data that will be updated
   const dataToUpdate = JSON.parse(dataAsBytes.toString());
   // Verify if codigo was not already used
   if (dataToUpdate.usado) {
     throw new Error(`codigo "${data.id}" ja usado`);
   }
 
-  // Merge formatted data
+  // 5. Merge formatted data
   const updatedData = { ...dataToUpdate, ...formattedData };
 
-  // Put unidadeTransporte in the Ledger & send event
+  // 6. Transform the JSON data into Bytes data
   const updatedDataAsBytes = Buffer.from(JSON.stringify(updatedData));
+
+  // 7. Push updated data into the ledger
   await stub.putState(updatedData.id, updatedDataAsBytes);
 
+  // 8. Create event
   stub.setEvent('codigoUsado', updatedDataAsBytes);
   console.info('==================');
   console.log(updatedData);
   console.info('==================');
-  console.info('--- usoCodigo ---');
+  console.info('--- usarCodigo ---');
 };
