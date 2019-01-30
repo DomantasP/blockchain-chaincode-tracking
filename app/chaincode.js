@@ -25,7 +25,7 @@ export default class Chaincode {
 
     const method = this[ret.fcn];
 
-    // Verify if method exist
+    // Verifies if method exist
     if (!method) {
       return shim.error(`funcao com nome "${ret.fcn}" nao encontrado`);
     }
@@ -41,9 +41,9 @@ export default class Chaincode {
 
   // Function for retrieving state value
   async getDataById(stub, args) {
-    // Assign id to data
+    // Assigns id to data
     const data = args[0];
-    // Verify id is not empty
+    // Verifies id is not empty
     if (!data) {
       throw new Error('Por favor especifique um id');
     }
@@ -84,7 +84,7 @@ export default class Chaincode {
   }
 
   // Rich Query (Only supported if CouchDB is used as state database):
-  // peer chaincode query -C myc -n mycc -c '{"Args":["richQuery","{\"selector\":{\"status\":\"1\"}}"]}'
+  // ex: peer chaincode query -C myc -n mycc -c '{"Args":["richQuery","{\"selector\":{\"docType\":\"batch\"}}"]}'
   async richQuery(stub, args, thisClass) {
     if (args.length < 1) {
       throw new Error('Incorrect number of arguments. Expecting queryString');
@@ -138,8 +138,7 @@ export default class Chaincode {
     }
   }
 
-  // getQueryResultForQueryString executes the passed in query string.
-  // Result set is built and returned as a byte array containing the JSON results.
+  // getQueryResultForQueryString executes the query passed in query string.
   async getQueryResultForQueryString(stub, queryString, thisClass) {
     console.info(`- getQueryResultForQueryString queryString:\n ${queryString}`);
     const resultsIterator = await stub.getQueryResult(queryString);

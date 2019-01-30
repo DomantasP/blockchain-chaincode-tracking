@@ -16,13 +16,12 @@
   "engine-strict": true,
   "license": "Apache-2.0",
   "dependencies": {
-    "@theledger/fabric-chaincode-utils": "^4.0.0",
-    "@theledger/fabric-mock-stub": "^3.0.0",
     "fabric-shim": "1.4",
     "uuid": "^3.3.2",
     "yup": "^0.26.6"
   },
   "devDependencies": {
+    "@theledger/fabric-mock-stub": "^3.0.0",
     "@babel/register": "^7.0.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
