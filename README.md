@@ -1,4 +1,6 @@
-# Blockchain
+# Tracking code generator using Hyperledger Fabric 1.4
+
+## Blockchain
 
 This project has been initiated as a proposal for establishing a normalized tracking code generator adapted for Brazilian Logistics. It's aiming at creating standardized tracking code for identifying assets during delivery process.
 
