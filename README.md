@@ -1,8 +1,10 @@
 # Blockchain
 
-This project has been initiated as a proposal for establishing a normalized tracking code generator adapted for Brazilian logistics. It's aiming at creating standardized tracking code for identifying assets during delivery process.
+This project has been initiated as a proposal for establishing a normalized tracking code generator adapted for Brazilian Logistics. It's aiming at creating standardized tracking code for identifying assets during delivery process.
 
 #### Why blockchain ?
+Blockchain is a distributed and decentralized database for the registration of information that can not be modified. It makes it a perfect choice for fast, secure and reliable medium of exchange. We believe it could revolutionize how data are exchanged within Logistics. By creating a network of trusted Nodes, this solution could bring an answer for generating trustworthy and secure tracking code.
+
 
 ## Tutorial
 
