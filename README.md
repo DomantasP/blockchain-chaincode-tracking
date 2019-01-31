@@ -5,7 +5,7 @@
 This project has been initiated as a proposal for establishing a normalized tracking code generator adapted for Brazilian logistics. It's aiming at creating standardized tracking code for identifying assets during delivery process.
 
 ## Tutorial
-A tutorial explaining the whole functioning of the chaincode is available at this [Link]()
+A tutorial explaining the whole functioning of the chaincode is available at this [Link](https://medium.com/@jojoooo/write-your-first-hyperledger-fabric-1-4-chaincode-bab3c484c35a)
 
 ## Use
 A specific [Fabric dev-mode environment](https://github.com/Jojoooo1/dev-mode-environment) has been created for rapid code/build/run/debug cycle
