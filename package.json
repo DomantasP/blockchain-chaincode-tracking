@@ -21,7 +21,7 @@
     "yup": "^0.26.6"
   },
   "devDependencies": {
-    "@theledger/fabric-mock-stub": "^3.0.0",
+    "@theledger/fabric-mock-stub": "^3.0.2",
     "@babel/register": "^7.0.0",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",

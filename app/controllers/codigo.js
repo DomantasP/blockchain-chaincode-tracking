@@ -66,10 +66,8 @@ export const solicitarCodigo = async (stub, args) => {
       // 6.1. Verifies if codigo already exist
       /* eslint-disable no-await-in-loop */
       const newCodigoAsBytes = await stub.getState(codigo.id);
-      // Ternary operation is use because the value returned by an empty key:value pair is set to undefined instead of '' in the testing environment
-      const newCodigoAsString = newCodigoAsBytes ? newCodigoAsBytes.toString() : '';
       // 6.2. Loop again and generate a new code if codigo already exist
-      if (!newCodigoAsString) {
+      if (!newCodigoAsBytes.toString()) {
         break;
       }
     }
@@ -123,11 +121,8 @@ export const usarCodigo = async (stub, args) => {
 
   const dataAsBytes = await stub.getState(data.id);
 
-  // Ternary operation is use because the value returned by an empty key:value pair is set to undefined instead of '' in the testing environment
-  const dataAsString = dataAsBytes ? dataAsBytes.toString() : '';
-
   // 3. Verifies if data already exist
-  if (!dataAsString) {
+  if (!dataAsBytes.toString()) {
     throw new Error(`codigo "${data.id}" nao encontrado`);
   }
 

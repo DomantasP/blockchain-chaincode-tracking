@@ -55,9 +55,8 @@ export default class Chaincode {
     // Ternary operation is used for testing purpose
     // The value returned by an empty key:value pair is set to undefined instead of '' in the testing environment
     // Causing toString() to throw an error
-    const dataAsString = dataAsBytes ? dataAsBytes.toString() : '';
     console.info('==================');
-    console.log(dataAsString);
+    console.log(dataAsBytes.toString());
     console.info('==================');
 
     console.info('--- end getDataById ---');
