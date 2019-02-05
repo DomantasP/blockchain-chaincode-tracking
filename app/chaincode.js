@@ -35,7 +35,7 @@ export default class Chaincode {
       return shim.success(payload);
     } catch (err) {
       console.log(err.stack);
-      return shim.error(err.message ? err.message : 'Por favor tente novamente mais tarde');
+      return shim.error(err.message ? err.message : 'Ocorreu um erro, Por favor tente novamente mais tarde');
     }
   }
 
@@ -52,9 +52,6 @@ export default class Chaincode {
 
     const dataAsBytes = await stub.getState(data);
 
-    // Ternary operation is used for testing purpose
-    // The value returned by an empty key:value pair is set to undefined instead of '' in the testing environment
-    // Causing toString() to throw an error
     console.info('==================');
     console.log(dataAsBytes.toString());
     console.info('==================');

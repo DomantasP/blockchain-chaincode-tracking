@@ -1,6 +1,5 @@
 const yup = require('yup');
 
-/* eslint-disable import/prefer-default-export */
 export const usarCodigoSchema = yup.object().shape({
   id: yup.string().required('Por favor especifique um id'),
   transportador: yup.string().required('Por favor especifique um transportador'),
