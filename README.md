@@ -23,7 +23,7 @@ npm run test
 
 ## Demo
 
-A live demo is available at [link]()
+A live demo is available at [link](http://blockchain-codigo-rastreamento.intelipost.com.br/)
 
 ## Contributing
 
@@ -39,7 +39,7 @@ ___
 
 Este projeto foi iniciado como uma proposta para o estabelecimento de um gerador de código de rastreamento padronizado para a Logística Brasileira. O objetivo é criar um código de rastreamento padronizado para identificar ativos durante o processo de entrega.
 
-#### Why blockchain ?
+#### Porque blockchain ?
 Blockchain é um banco de dados distribuído e descentralizado para o registro de informações que não podem ser modificadas. É uma escolha perfeita para meios rápidos, seguros e confiáveis de troca digitalizada. Acreditamos que poderia revolucionar a forma como os dados são trocados na Logística. Ao criar uma rede de Nodes confiáveis, essa solução poderia fornecer uma resposta para gerar um código de rastreamento confiável e seguro.
 
 
@@ -47,7 +47,7 @@ Blockchain é um banco de dados distribuído e descentralizado para o registro d
 
 Um tutorial explicando todo o funcionamento do chaincode está disponível aqui [Link](https://medium.com/@jojoooo/write-your-first-hyperledger-fabric-1-4-chaincode-bab3c484c35a).
 
-## Use
+## Uso
 
 Um [Fabric dev-mode environment](https://github.com/Jojoooo1/dev-mode-environment) específico foi criado para rapid code/build/run/debug ciclo.
 
@@ -59,9 +59,9 @@ npm run test
 
 ## Demo
 
-Uma demonstração ao vivo está disponível aqui [link]()
+Uma demonstração ao vivo está disponível aqui [link](http://blockchain-codigo-rastreamento.intelipost.com.br/)
 
-## Contributing
+## Contribuindo
 
 Pull requests são bem-vindos. Para alterações importantes, por favor, abra um issue primeiro para discutir o que você gostaria de mudar.
 
