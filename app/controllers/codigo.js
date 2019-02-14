@@ -33,8 +33,10 @@ export const solicitarCodigo = async (stub, args) => {
     throw new Error('Embarcador nao disponivel');
   }
 
-  // 4. gets MSPID of transaction proposer
+  // 4.1 gets MSPID of transaction proposer
   const organizationMSPID = stub.getCreator().mspid;
+  // 4.2 Get UTC date of header proposal
+  const timestamp = new Date(stub.getTxTimestamp().getSeconds() * 1000).toISOString();
 
   // 5. Creates batch
   const batch = {
@@ -43,7 +45,9 @@ export const solicitarCodigo = async (stub, args) => {
     id: uuidv4(),
     codigos: [],
     quantidade: data.quantidade,
-    organization: organizationMSPID
+    organization: organizationMSPID,
+    dateOfProposalCreation: timestamp,
+    dateOfLastProposalUpdate: timestamp
   };
 
   // 6. Creates tracking code
@@ -59,7 +63,9 @@ export const solicitarCodigo = async (stub, args) => {
         rota: '',
         servico: '',
         servico_codigo: '',
-        usado: false
+        usado: false,
+        dateOfProposalCreation: timestamp,
+        dateOfLastProposalUpdate: timestamp
         // status: 1
       };
 
@@ -133,13 +139,16 @@ export const usarCodigo = async (stub, args) => {
     throw new Error(`codigo "${data.id}" ja usado`);
   }
 
-  // 5. Merges formatted data
+  // 5 Gets UTC date of header proposal
+  formattedData.dateOfLastProposalUpdate = new Date(stub.getTxTimestamp().getSeconds() * 1000).toISOString();
+
+  // 6. Merges formatted data
   const updatedData = { ...dataToUpdate, ...formattedData };
 
-  // 6. Transforms the JSON data into Bytes data
+  // 7. Transforms the JSON data into Bytes data
   const updatedDataAsBytes = Buffer.from(JSON.stringify(updatedData));
 
-  // 7. Pushes updated data into the ledger
+  // 8. Pushes updated data into the ledger
   await stub.putState(updatedData.id, updatedDataAsBytes);
 
   // 8. Creates event

@@ -61,6 +61,35 @@ export default class Chaincode {
     return dataAsBytes;
   }
 
+  // The keys are returned by the iterator in lexical order. Note that startKey and endKey can be empty string
+  // Query is re-executed during validation phase
+  async getDataByRange(stub, args, thisClass) {
+    let data;
+
+    // 1. Parses JSON stringified request
+    try {
+      data = JSON.parse(args.toString());
+    } catch (err) {
+      throw new Error('Não foi possivel decodificar o JSON, por favor verifique o formato');
+    }
+
+    // 2. Gets identifier
+    const { startKey, endKey } = data;
+    if (startKey === undefined || endKey === undefined) {
+      throw new Error('startKey/endKey nao pode ser "undefined"');
+    }
+
+    console.info('--- start getDataByRange ---');
+
+    const resultsIterator = await stub.getStateByRange(startKey, endKey);
+    const method = thisClass['getAllResults'];
+    const results = await method(resultsIterator, false);
+
+    console.info('--- end getDataByRange ---');
+
+    return Buffer.from(JSON.stringify(results));
+  }
+
   // Function for creating batch of tracking code
   async solicitarCodigo(stub, args) {
     try {
@@ -82,16 +111,73 @@ export default class Chaincode {
   // Rich Query (Only supported if CouchDB is used as state database):
   // ex: peer chaincode query -C myc -n mycc -c '{"Args":["richQuery","{\"selector\":{\"docType\":\"batch\"}}"]}'
   async richQuery(stub, args, thisClass) {
-    if (args.length < 1) {
-      throw new Error('Incorrect number of arguments. Expecting queryString');
+    let data;
+    let method;
+    let params;
+
+    // 1. Parses JSON stringified request
+    try {
+      data = JSON.parse(args.toString());
+    } catch (err) {
+      throw new Error('Não foi possivel decodificar o JSON, por favor verifique o formato');
     }
-    const queryString = args[0];
-    if (!queryString) {
-      throw new Error('queryString must not be empty');
+
+    // Verifies if queryString is passed
+    if (!data.queryString) {
+      throw new Error('queryString nao pode ser vazio');
     }
-    const method = thisClass['getQueryResultForQueryString'];
-    const queryResults = await method(stub, queryString, thisClass);
+
+    const queryString = JSON.stringify(data.queryString);
+
+    // If pagination params are passed gets QueryResult with pagination
+    if (data.pagination && data.pagination.pageSize) {
+      params = { queryString, pagination: data.pagination };
+      method = thisClass['getQueryResultForQueryStringWithPagination'];
+    } else {
+      params = queryString;
+      method = thisClass['getQueryResultForQueryString'];
+    }
+
+    const queryResults = await method(stub, params, thisClass);
+
     return queryResults;
+  }
+
+  // getQueryResultForQueryString executes the query passed in query string.
+  async getQueryResultForQueryString(stub, queryString, thisClass) {
+    console.info('- getQueryResultForQueryString ---');
+
+    const resultsIterator = await stub.getQueryResult(queryString);
+    const method = thisClass['getAllResults'];
+    const results = await method(resultsIterator, false);
+
+    console.log('--- end using getQueryResultForQueryString ---');
+
+    return Buffer.from(JSON.stringify(results));
+  }
+
+  // ====== Pagination =========================================================================
+  // queryString, pageSize, bookmark
+  async getQueryResultForQueryStringWithPagination(stub, args, thisClass) {
+    console.log('--- start using getQueryResultForQueryStringWithPagination ---');
+
+    const { queryString, pagination } = args;
+    const pageSize = parseInt(pagination.pageSize, 10);
+    const bookmark = pagination.bookmark || '';
+
+    const { iterator, metadata } = await stub.getQueryResultWithPagination(queryString, pageSize, bookmark);
+
+    const getAllResults = thisClass['getAllResults'];
+    const results = await getAllResults(iterator, false);
+    // use RecordsCount and Bookmark to keep consistency with the go sample
+    results.ResponseMetadata = {
+      RecordsCount: metadata.fetched_records_count,
+      Bookmark: metadata.bookmark
+    };
+
+    console.log('--- end using getQueryResultForQueryStringWithPagination ---');
+
+    return Buffer.from(JSON.stringify(results));
   }
 
   async getAllResults(iterator, isHistory) {
@@ -132,17 +218,6 @@ export default class Chaincode {
         return allResults;
       }
     }
-  }
-
-  // getQueryResultForQueryString executes the query passed in query string.
-  async getQueryResultForQueryString(stub, queryString, thisClass) {
-    console.info(`- getQueryResultForQueryString queryString:\n ${queryString}`);
-    const resultsIterator = await stub.getQueryResult(queryString);
-    const method = thisClass['getAllResults'];
-
-    const results = await method(resultsIterator, false);
-
-    return Buffer.from(JSON.stringify(results));
   }
 
   async getHistory(stub, args, thisClass) {

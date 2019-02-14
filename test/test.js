@@ -1,8 +1,7 @@
 import { expect } from 'chai';
 import { ChaincodeMockStub } from '@theledger/fabric-mock-stub';
-import { Transform } from '@theledger/fabric-mock-stub';
 
-import Chaincode from '../app/chaincode.js';
+import Chaincode from '../app/chaincode';
 
 const MyChaincode = new Chaincode();
 
@@ -17,13 +16,11 @@ describe('Test chaincode', () => {
   it('Return errors if method does not exist', async () => {
     const testFunction = 'testFunction';
     const response = await mockStub.mockInvoke('tx1', [testFunction, 'test']);
-    console.log(response);
     expect(response.message).to.equal(`funcao com nome "${testFunction}" nao encontrado`);
   });
 
   it('Should return empty string if the data requested does not exist', async () => {
     const response = await mockStub.mockInvoke('tx1', ['getDataById', 'test']);
-    console.log(response);
     expect(response.payload.toString()).to.equal('');
   });
 
@@ -33,7 +30,6 @@ describe('Test chaincode', () => {
       embarcador: 'b2w'
     };
     const response = await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
-    console.log(response);
     expect(response.status).to.equal(200);
   });
 
@@ -42,7 +38,7 @@ describe('Test chaincode', () => {
       quantidade: 10,
       embarcador: 'b2w'
     };
-    const batchResponse = await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
+    await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
     const eventPayload = await mockStub.getEvent('batchCreated');
     const batchId = JSON.parse(eventPayload.toString()).id;
     const response = await mockStub.mockInvoke('tx2', ['getDataById', batchId]);
@@ -54,7 +50,7 @@ describe('Test chaincode', () => {
       quantidade: 10,
       embarcador: 'b2w'
     };
-    const batchResponse = await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
+    await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
     const eventPayload = await mockStub.getEvent('batchCreated');
     const codigoId = JSON.parse(eventPayload.toString()).codigos[0];
     const response = await mockStub.mockInvoke('tx2', ['getDataById', codigoId]);
@@ -66,7 +62,7 @@ describe('Test chaincode', () => {
       quantidade: 10,
       embarcador: 'b2w'
     };
-    const batchResponse = await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
+    await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
     const eventPayload = await mockStub.getEvent('batchCreated');
     const codigoId = JSON.parse(eventPayload.toString()).codigos[0];
     const useCodigoRequest = {
@@ -76,19 +72,12 @@ describe('Test chaincode', () => {
       servico: 'test',
       servico_codigo: 'test'
     };
-    const usarCodigoResponse = await mockStub.mockInvoke('tx2', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
+    await mockStub.mockInvoke('tx2', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
     const response = await mockStub.mockInvoke('tx3', ['getDataById', codigoId]);
     expect(JSON.parse(response.payload.toString()).usado).to.equal(true);
   });
 
   it('I can not USE a Codigo that does not exist', async () => {
-    const request = {
-      quantidade: 10,
-      embarcador: 'b2w'
-    };
-    const batchResponse = await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
-    const eventPayload = await mockStub.getEvent('batchCreated');
-    const codigoId = JSON.parse(eventPayload.toString()).codigos[0];
     const useCodigoRequest = {
       id: 'test',
       transportador: 'test',
@@ -96,6 +85,7 @@ describe('Test chaincode', () => {
       servico: 'test',
       servico_codigo: 'test'
     };
+
     const usarCodigoResponse = await mockStub.mockInvoke('tx2', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
     expect(usarCodigoResponse.message).to.equal('codigo "test" nao encontrado');
   });
@@ -105,10 +95,11 @@ describe('Test chaincode', () => {
       quantidade: 10,
       embarcador: 'b2w'
     };
-    const batchResponse = await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
-    const eventPayload = await mockStub.getEvent('batchCreated');
+    await mockStub.mockInvoke('tx1', ['solicitarCodigo', JSON.stringify(request)]);
 
-    let codigoId = JSON.parse(eventPayload.toString()).codigos[0];
+    const eventPayload = await mockStub.getEvent('batchCreated');
+    const codigoId = JSON.parse(eventPayload.toString()).codigos[0];
+
     const useCodigoRequest = {
       id: codigoId,
       transportador: 'test',
@@ -117,7 +108,7 @@ describe('Test chaincode', () => {
       servico_codigo: 'test'
     };
 
-    const usarCodigoResponse = await mockStub.mockInvoke('tx2', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
+    await mockStub.mockInvoke('tx2', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
     const codigoCreated = await mockStub.mockInvoke('tx3', ['getDataById', codigoId]);
 
     const useCodigoRequest2 = {
@@ -128,7 +119,12 @@ describe('Test chaincode', () => {
       servico_codigo: 'test',
       usado: false
     };
-    const usarCodigoResponse2 = await mockStub.mockInvoke('tx4', ['usarCodigo', JSON.stringify(useCodigoRequest)]);
-    expect(usarCodigoResponse2.message).to.equal(`codigo "${codigoId}" ja usado`);
+    const usarCodigoResponse2 = await mockStub.mockInvoke('tx4', ['usarCodigo', JSON.stringify(useCodigoRequest2)]);
+    expect(usarCodigoResponse2.message).to.equal('"usado" nao definido como true');
+  });
+
+  it('I can getDataByRange', async () => {
+    const response = await mockStub.mockInvoke('tx1', ['getDataByRange', JSON.stringify({ startKey: '', endKey: '' })]);
+    expect(response.status).to.equal(200);
   });
 });

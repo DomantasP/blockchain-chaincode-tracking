@@ -1,0 +1,6 @@
+{
+  "index": { "fields": ["docType", "embarcador", "usado"] },
+  "ddoc": "indexCodigoUsadoByEmbarcadorDoc",
+  "name": "indexCodigoUsadoByEmbarcador",
+  "type": "json"
+}
