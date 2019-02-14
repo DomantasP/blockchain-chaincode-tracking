@@ -34,6 +34,7 @@ export default class Chaincode {
       const payload = await method(stub, ret.params, this);
       return shim.success(payload);
     } catch (err) {
+      console.log('errors definition:');
       console.log(err.stack);
       return shim.error(err.message ? err.message : 'Ocorreu um erro, Por favor tente novamente mais tarde');
     }
@@ -137,8 +138,12 @@ export default class Chaincode {
       params = queryString;
       method = thisClass['getQueryResultForQueryString'];
     }
-
-    const queryResults = await method(stub, params, thisClass);
+    let queryResults;
+    try {
+      queryResults = await method(stub, params, thisClass);
+    } catch (err) {
+      throw new Error(err.message ? err.message : 'Por favor tente novamente mais tarde');
+    }
 
     return queryResults;
   }
